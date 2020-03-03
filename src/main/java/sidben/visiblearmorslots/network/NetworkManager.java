@@ -1,9 +1,9 @@
 package sidben.visiblearmorslots.network;
 
-import net.minecraft.inventory.Slot;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraft.inventory.container.Slot;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 import sidben.visiblearmorslots.util.LogHelper;
 
 
@@ -12,15 +12,15 @@ public class NetworkManager
 
     private static final String         MOD_CHANNEL = "ch_sidben_vsa";
     private static int                  packetdId   = 0;
-    private static SimpleNetworkWrapper _networkWrapper;
+    private static SimpleChannel simpleChannel;
 
 
 
     public static void registerMessages()
     {
-        _networkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel(MOD_CHANNEL);
+        simpleChannel = NetworkRegistry.newSimpleChannel(MOD_CHANNEL);
 
-        _networkWrapper.registerMessage(MessageSlotAction.Handler.class, MessageSlotAction.class, packetdId++, Side.SERVER);
+        simpleChannel.registerMessage(MessageSlotAction.Handler.class, MessageSlotAction.class, packetdId++, Dist.SERVER);
     }
 
 
@@ -30,7 +30,7 @@ public class NetworkManager
         final MessageSlotAction message = new MessageSlotAction(resolverIndex, targetSlot);
         LogHelper.trace("NetworkManager.send - %s", message);
 
-        _networkWrapper.sendToServer(message);
+        simpleChannel.sendToServer(message);
     }
 
 

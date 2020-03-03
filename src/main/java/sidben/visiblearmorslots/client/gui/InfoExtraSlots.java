@@ -1,5 +1,7 @@
 package sidben.visiblearmorslots.client.gui;
 
+import net.minecraft.entity.player.PlayerEntity;
+
 import javax.annotation.concurrent.Immutable;
 
 
@@ -44,7 +46,7 @@ public class InfoExtraSlots
     /**
      * Index where the ItemStack will be found in the player inventory.
      *
-     * @see {@link net.minecraft.entity.player.EntityPlayer#inventory EntityPlayer.inventory}.
+     * @see {@link PlayerEntity#inventory EntityPlayer.inventory}.
      */
     public int getInventorySlotIndex()
     {
@@ -54,7 +56,7 @@ public class InfoExtraSlots
     /**
      * Index where the slot that holds this item will be found in the player container.
      *
-     * @see {@link net.minecraft.entity.player.EntityPlayer#inventoryContainer EntityPlayer.inventoryContainer}.
+     * @see {@link PlayerEntity#container EntityPlayer.inventoryContainer}.
      */
     public int getContainerSlotIndex()
     {

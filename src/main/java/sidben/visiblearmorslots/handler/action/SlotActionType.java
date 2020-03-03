@@ -1,8 +1,8 @@
 package sidben.visiblearmorslots.handler.action;
 
 import javax.annotation.concurrent.Immutable;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Slot;
 
 
 @Immutable
@@ -105,7 +105,7 @@ public class SlotActionType
      *            Type of mouse click.
      * @return
      */
-    public static SlotActionType create(EntityPlayer player, Slot slot, boolean shiftPressed, EnumMouseAction mouseButton)
+    public static SlotActionType create(PlayerEntity player, Slot slot, boolean shiftPressed, EnumMouseAction mouseButton)
     {
         if (player != null && slot != null) { return new SlotActionType(!player.inventory.getItemStack().isEmpty(), player.capabilities.isCreativeMode, slot.getHasStack(), shiftPressed, mouseButton,
                 EnumKeyboardAction.INVALID); }
@@ -123,7 +123,7 @@ public class SlotActionType
      *            Type of keyboard key press.
      * @return
      */
-    public static SlotActionType create(EntityPlayer player, Slot slot, EnumKeyboardAction keyboardKey)
+    public static SlotActionType create(PlayerEntity player, Slot slot, EnumKeyboardAction keyboardKey)
     {
         if (player != null && slot != null) { return new SlotActionType(!player.inventory.getItemStack().isEmpty(), player.capabilities.isCreativeMode, slot.getHasStack(), false,
                 EnumMouseAction.INVALID, keyboardKey); }

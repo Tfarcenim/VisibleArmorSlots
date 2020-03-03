@@ -1,16 +1,16 @@
 package sidben.visiblearmorslots.handler.action;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Slot;
 
 
 public interface ISlotActionResolver
 {
-    public void handleClientSide(Slot targetSlot, EntityPlayer player);
+    void handleClientSide(Slot targetSlot, PlayerEntity player);
 
-    public void handleServerSide(Slot targetSlot, EntityPlayer player);
+    void handleServerSide(Slot targetSlot, PlayerEntity player);
 
-    public boolean requiresServerSideHandling();
+    boolean requiresServerSideHandling();
 
-    public boolean isSatisfiedBy(SlotActionType action);
+    boolean isSatisfiedBy(SlotActionType action);
 }

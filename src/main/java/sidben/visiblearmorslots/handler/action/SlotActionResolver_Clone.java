@@ -1,7 +1,9 @@
 package sidben.visiblearmorslots.handler.action;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.ClickType;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 
 
@@ -12,7 +14,7 @@ public class SlotActionResolver_Clone extends SlotActionResolver
 
 
     @Override
-    public void handleClientSide(Slot targetSlot, EntityPlayer player)
+    public void handleClientSide(Slot targetSlot, PlayerEntity player)
     {
         this._needsServerSide = false;
         this.cloneStack(targetSlot, player);
@@ -20,16 +22,16 @@ public class SlotActionResolver_Clone extends SlotActionResolver
 
 
     @Override
-    public void handleServerSide(Slot targetSlot, EntityPlayer player)
+    public void handleServerSide(Slot targetSlot, PlayerEntity player)
     {
         this.cloneStack(targetSlot, player);
     }
 
 
     /**
-     * Reference: {@link net.minecraft.inventory.Container#slotClick() Container.slotClick()}
+     * Reference: {@link Container#slotClick(int, int, ClickType, PlayerEntity)}}
      */
-    private void cloneStack(Slot targetSlot, EntityPlayer player)
+    private void cloneStack(Slot targetSlot, PlayerEntity player)
     {
         if (targetSlot.getStack().isEmpty()) { return; }
 

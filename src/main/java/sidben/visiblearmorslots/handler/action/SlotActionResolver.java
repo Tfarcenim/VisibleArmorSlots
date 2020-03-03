@@ -1,7 +1,7 @@
 package sidben.visiblearmorslots.handler.action;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Slot;
 
 
 public abstract class SlotActionResolver implements ISlotActionResolver
@@ -9,13 +9,13 @@ public abstract class SlotActionResolver implements ISlotActionResolver
 
 
     @Override
-    public void handleClientSide(Slot targetSlot, EntityPlayer player)
+    public void handleClientSide(Slot targetSlot, PlayerEntity player)
     {
     }
 
 
     @Override
-    public void handleServerSide(Slot targetSlot, EntityPlayer player)
+    public void handleServerSide(Slot targetSlot, PlayerEntity player)
     {
     }
 

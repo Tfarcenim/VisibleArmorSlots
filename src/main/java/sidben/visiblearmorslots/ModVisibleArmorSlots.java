@@ -1,58 +1,30 @@
 package sidben.visiblearmorslots;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import sidben.visiblearmorslots.handler.EventHandlerConfig;
 import sidben.visiblearmorslots.main.ModConfig;
 import sidben.visiblearmorslots.main.Reference;
-import sidben.visiblearmorslots.proxy.IProxy;
+import sidben.visiblearmorslots.network.NetworkManager;
+
+import static sidben.visiblearmorslots.main.ModConfig.SERVER_SPEC;
 
 
-@Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, guiFactory = Reference.GUI_FACTORY_CLASS, updateJSON = Reference.UPDATE_JSON_URL)
-public class ModVisibleArmorSlots
-{
+@Mod(Reference.MOD_ID)
+public class ModVisibleArmorSlots {
 
-    @Mod.Instance(Reference.MOD_ID)
-    public static ModVisibleArmorSlots INSTANCE;
+	public ModVisibleArmorSlots(){
+		ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.SERVER, SERVER_SPEC);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
+	}
 
-    @SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
-    public static IProxy               PROXY;
+	private void init(FMLCommonSetupEvent e){
+		NetworkManager.registerMessages();
+		MinecraftForge.EVENT_BUS.register(EventHandlerConfig.class);
+		//ModConfig.updateBlacklistedMods();
 
-
-
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event)
-    {
-        // Loads config
-        ModConfig.init(event.getSuggestedConfigurationFile());
-        MinecraftForge.EVENT_BUS.register(EventHandlerConfig.class);
-
-        // Sided pre-initialization
-        PROXY.pre_initialize();
-    }
-
-
-    @Mod.EventHandler
-    public void load(FMLInitializationEvent event)
-    {
-        // Sided initializations
-        PROXY.initialize();
-    }
-
-
-    @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event)
-    {
-        // Sided post-initialization
-        PROXY.post_initialize();
-
-        ModConfig.updateBlacklistedMods();
-    }
-
-
-
+	}
 }

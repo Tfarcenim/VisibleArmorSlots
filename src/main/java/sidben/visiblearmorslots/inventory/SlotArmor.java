@@ -1,77 +1,72 @@
 package sidben.visiblearmorslots.inventory;
 
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemArmor;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 
-public class SlotArmor extends Slot
-{
+public class SlotArmor extends Slot {
+
+	private static final String[] ARMOR_SLOT_TEXTURES = new String[]{"item/empty_armor_slot_boots", "item/empty_armor_slot_leggings", "item/empty_armor_slot_chestplate", "item/empty_armor_slot_helmet"};
 
 
-    private static final EntityEquipmentSlot[] armorSloyArray = new EntityEquipmentSlot[] { EntityEquipmentSlot.FEET, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.HEAD };
+	private static final EquipmentSlotType[] armorSloyArray = new EquipmentSlotType[]{EquipmentSlotType.FEET, EquipmentSlotType.LEGS, EquipmentSlotType.CHEST, EquipmentSlotType.HEAD};
 
-    private final EntityPlayer                 thePlayer;
-    private int                                slotTypeIndex  = 0;
-
-
-
-    public SlotArmor(IInventory inventoryIn, int index, int xPosition, int yPosition) {
-        super(inventoryIn, index, xPosition, yPosition);
-
-        thePlayer = ((InventoryPlayer) inventoryIn).player;
-        slotTypeIndex = index - 36;
-        slotTypeIndex = Math.min(Math.max(slotTypeIndex, 0), armorSloyArray.length - 1);
-    }
+	private final PlayerEntity thePlayer;
+	private int slotTypeIndex = 0;
 
 
-    /**
-     * Returns the maximum stack size for a given slot (usually the same as getInventoryStackLimit(), but 1
-     * in the case of armor slots)
-     */
-    @Override
-    public int getSlotStackLimit()
-    {
-        return 1;
-    }
+	public SlotArmor(IInventory inventoryIn, int index, int xPosition, int yPosition) {
+		super(inventoryIn, index, xPosition, yPosition);
+
+		thePlayer = ((PlayerInventory) inventoryIn).player;
+		slotTypeIndex = index - 36;
+		slotTypeIndex = Math.min(Math.max(slotTypeIndex, 0), armorSloyArray.length - 1);
+	}
 
 
-    /**
-     * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
-     */
-    @Override
-    public boolean isItemValid(ItemStack stack)
-    {
-        if (stack == null) {
-            return false;
-        } else {
-            return stack.getItem().isValidArmor(stack, armorSloyArray[slotTypeIndex], thePlayer);
-        }
-    }
+	/**
+	 * Returns the maximum stack size for a given slot (usually the same as getInventoryStackLimit(), but 1
+	 * in the case of armor slots)
+	 */
+	@Override
+	public int getSlotStackLimit() {
+		return 1;
+	}
 
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public String getSlotTexture()
-    {
-        return ItemArmor.EMPTY_SLOT_NAMES[slotTypeIndex];
-    }
+	/**
+	 * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
+	 */
+	@Override
+	public boolean isItemValid(ItemStack stack) {
+		if (stack == null) {
+			return false;
+		} else {
+			return stack.getItem().canEquip(stack, armorSloyArray[slotTypeIndex], thePlayer);
+		}
+	}
 
 
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public String getSlotTexture() {
+		return ARMOR_SLOT_TEXTURES[slotTypeIndex];
+	}
 
-    @Override
-    public boolean canTakeStack(EntityPlayer player)
-    {
-        final ItemStack itemstack = this.getStack();
-        return !itemstack.isEmpty() && !player.isCreative() && EnchantmentHelper.hasBindingCurse(itemstack) ? false : super.canTakeStack(player);
-    }
+
+	@Override
+	public boolean canTakeStack(PlayerEntity player) {
+		final ItemStack itemstack = this.getStack();
+		return (itemstack.isEmpty() || player.isCreative() || !EnchantmentHelper.hasBindingCurse(itemstack)) && super.canTakeStack(player);
+	}
 
 
 }

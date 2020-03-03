@@ -1,7 +1,7 @@
 package sidben.visiblearmorslots.handler;
 
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import sidben.visiblearmorslots.main.ModConfig;
 import sidben.visiblearmorslots.main.Reference;
 

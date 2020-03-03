@@ -1,9 +1,9 @@
 package sidben.visiblearmorslots.inventory;
 
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.inventory.container.Slot;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 
 
@@ -16,7 +16,7 @@ public class SlotOffHand extends Slot
 
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public String getSlotTexture()
     {
         return "minecraft:items/empty_armor_slot_shield";

@@ -1,7 +1,8 @@
 package sidben.visiblearmorslots.handler.action;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import sidben.visiblearmorslots.util.ItemStackHelper;
@@ -17,7 +18,7 @@ public class SlotActionResolver_QuickTakeFromSlot extends SlotActionResolver
 
 
     @Override
-    public void handleClientSide(Slot targetSlot, EntityPlayer player)
+    public void handleClientSide(Slot targetSlot, PlayerEntity player)
     {
         this._needsServerSide = false;
         this.quickTake(targetSlot, player);
@@ -25,16 +26,16 @@ public class SlotActionResolver_QuickTakeFromSlot extends SlotActionResolver
 
 
     @Override
-    public void handleServerSide(Slot targetSlot, EntityPlayer player)
+    public void handleServerSide(Slot targetSlot, PlayerEntity player)
     {
         this.quickTake(targetSlot, player);
     }
 
 
     /**
-     * Reference: {@link net.minecraft.inventory.Container#mergeItemStack() Container.mergeItemStack()}
+     * Reference: {@link Container#mergeItemStack() Container.mergeItemStack()}
      */
-    private void quickTake(Slot targetSlot, EntityPlayer player)
+    private void quickTake(Slot targetSlot, PlayerEntity player)
     {
         if (targetSlot.getStack().isEmpty() || !targetSlot.canTakeStack(player)) { return; }
 

@@ -1,8 +1,8 @@
 package sidben.visiblearmorslots.handler.action;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.Items;
 import net.minecraft.item.ItemStack;
 import sidben.visiblearmorslots.util.LogHelper;
 
@@ -15,11 +15,11 @@ public class SlotActionResolver_Debug extends SlotActionResolver
 
 
     @Override
-    public void handleClientSide(Slot targetSlot, EntityPlayer player)
+    public void handleClientSide(Slot targetSlot, PlayerEntity player)
     {
 
         try {
-            LogHelper.debug("*** %s", player.inventoryContainer);
+            LogHelper.debug("*** %s", player.container);
             LogHelper.debug("*** %s", player.inventory);
             LogHelper.debug("*** %s", player.openContainer);
             LogHelper.debug("*** %s", player.openContainer.getClass().getName().contains("ContainerCreative"));
@@ -30,7 +30,7 @@ public class SlotActionResolver_Debug extends SlotActionResolver
 
 
             final int slotIndex = 40;
-            final Slot offHandSlot = player.inventoryContainer.getSlot(45);
+            final Slot offHandSlot = player.container.getSlot(45);
 
             LogHelper.debug("*** (c1) Slot index %d, number %d, has %s", offHandSlot.getSlotIndex(), offHandSlot.slotNumber, offHandSlot.getStack());
             LogHelper.debug("*** (c1) Inventory index %d, has %s", slotIndex, player.inventory.getStackInSlot(slotIndex));
@@ -50,7 +50,7 @@ public class SlotActionResolver_Debug extends SlotActionResolver
                 offHandSlot.putStack(diamonds);
 
                 if (unnecessarilyLongVariableToDetermineIfThePlayerIsOnCreativeModeWithPersonalContainerThatDontRequireServerSideHandling) {
-                    player.inventoryContainer.detectAndSendChanges();
+                    player.container.detectAndSendChanges();
                 }
             }
 
@@ -69,18 +69,18 @@ public class SlotActionResolver_Debug extends SlotActionResolver
 
 
     @Override
-    public void handleServerSide(Slot targetSlot, EntityPlayer player)
+    public void handleServerSide(Slot targetSlot, PlayerEntity player)
     {
 
         try {
-            LogHelper.debug("*** %s", player.inventoryContainer);
+            LogHelper.debug("*** %s", player.container);
             LogHelper.debug("*** %s", player.inventory);
             LogHelper.debug("*** %s", player.openContainer);
 
 
 
             final int slotIndex = 40;
-            final Slot offHandSlot = player.inventoryContainer.getSlot(45);
+            final Slot offHandSlot = player.container.getSlot(45);
             LogHelper.debug("*** (s1) Slot index %d, number %d, has %s", offHandSlot.getSlotIndex(), offHandSlot.slotNumber, offHandSlot.getStack());
             LogHelper.debug("*** (s1) Inventory index %d, has %s", slotIndex, player.inventory.getStackInSlot(slotIndex));
             LogHelper.debug("*** (s1) Player mouse has %s", player.inventory.getItemStack());

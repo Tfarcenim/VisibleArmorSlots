@@ -13,8 +13,7 @@ public class ItemStackHelper
 
     public static boolean areStacksCompatible(ItemStack targetStack, ItemStack candidateStack)
     {
-        final boolean stacksCompatible = ItemStack.areItemsEqual(targetStack, candidateStack) 
-                && targetStack.getMetadata() == candidateStack.getMetadata()
+        final boolean stacksCompatible = ItemStack.areItemsEqual(targetStack, candidateStack)
                 && ItemStack.areItemStackTagsEqual(targetStack, candidateStack);
 
         return stacksCompatible;

@@ -1,7 +1,7 @@
 package sidben.visiblearmorslots.handler.action;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import sidben.visiblearmorslots.util.ItemStackHelper;
 
@@ -14,7 +14,7 @@ public class SlotActionResolver_TryPlacingOneItemOnSlot extends SlotActionResolv
 
 
     @Override
-    public void handleClientSide(Slot targetSlot, EntityPlayer player)
+    public void handleClientSide(Slot targetSlot, PlayerEntity player)
     {
         this._needsServerSide = false;
         this.placeOneItemOnSlot(targetSlot, player);
@@ -22,13 +22,13 @@ public class SlotActionResolver_TryPlacingOneItemOnSlot extends SlotActionResolv
 
 
     @Override
-    public void handleServerSide(Slot targetSlot, EntityPlayer player)
+    public void handleServerSide(Slot targetSlot, PlayerEntity player)
     {
         this.placeOneItemOnSlot(targetSlot, player);
     }
 
 
-    private void placeOneItemOnSlot(Slot targetSlot, EntityPlayer player)
+    private void placeOneItemOnSlot(Slot targetSlot, PlayerEntity player)
     {
 
         final ItemStack mouseStack = player.inventory.getItemStack();

@@ -1,9 +1,9 @@
 package sidben.visiblearmorslots.handler;
 
 import javax.annotation.concurrent.Immutable;
-import net.minecraft.client.gui.inventory.GuiChest;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiShulkerBox;
+import net.minecraft.client.gui.screen.inventory.ChestScreen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screen.inventory.ShulkerBoxScreen;
 import sidben.visiblearmorslots.client.gui.GuiExtraSlotsOverlay;
 import sidben.visiblearmorslots.main.ModConfig;
 import sidben.visiblearmorslots.util.LogHelper;
@@ -47,7 +47,7 @@ public class InfoGuiOverlayDisplayParams
 
 
 
-    public static InfoGuiOverlayDisplayParams create(GuiContainer gui, String guiClassName)
+    public static InfoGuiOverlayDisplayParams create(ContainerScreen gui, String guiClassName)
     {
         if (gui == null) { return InfoGuiOverlayDisplayParams.EMPTY; }
 
@@ -68,7 +68,7 @@ public class InfoGuiOverlayDisplayParams
 
 
         // HOTFIX: Chest containers have their height (YSize) wrong
-        if (gui instanceof GuiChest || gui instanceof GuiShulkerBox) {
+        if (gui instanceof ChestScreen || gui instanceof ShulkerBoxScreen) {
             overlayY -= 1;
         }
 
@@ -79,7 +79,7 @@ public class InfoGuiOverlayDisplayParams
 
 
 
-    protected final static boolean isBlacklisted(GuiContainer gui)
+    protected final static boolean isBlacklisted(ContainerScreen gui)
     {
         if (ModConfig.blacklistedModPackages().length > 0) {
             final String className = gui.getClass().getName();

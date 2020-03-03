@@ -1,8 +1,9 @@
 package sidben.visiblearmorslots.handler.action;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import sidben.visiblearmorslots.inventory.SlotOffHand;
 import sidben.visiblearmorslots.main.ModConfig;
@@ -22,7 +23,7 @@ public class SlotActionResolver_TrySwapWithOffHandSlot extends SlotActionResolve
 
 
     @Override
-    public void handleClientSide(Slot targetSlot, EntityPlayer player)
+    public void handleClientSide(Slot targetSlot, PlayerEntity player)
     {
         this._needsServerSide = false;
         this.swapWithOffHandSlot(targetSlot, player);
@@ -30,14 +31,14 @@ public class SlotActionResolver_TrySwapWithOffHandSlot extends SlotActionResolve
 
 
     @Override
-    public void handleServerSide(Slot targetSlot, EntityPlayer player)
+    public void handleServerSide(Slot targetSlot, PlayerEntity player)
     {
         this.swapWithOffHandSlot(targetSlot, player);
     }
 
 
 
-    private void swapWithOffHandSlot(Slot targetSlot, EntityPlayer player)
+    private void swapWithOffHandSlot(Slot targetSlot, PlayerEntity player)
     {
         if (targetSlot instanceof SlotOffHand) { return; }
 
@@ -55,7 +56,7 @@ public class SlotActionResolver_TrySwapWithOffHandSlot extends SlotActionResolve
         // Slots of the creative inventory have an InventoryBasic reference, player slots have a InventoryPlayer reference.
 
         final boolean isPlayerOnCreativeInventory = player.openContainer.getClass().getName().contains(CREATIVE_CONTAINER_NAME);
-        final boolean isTargetSlotFromCreativeTabs = isPlayerOnCreativeInventory && !(targetSlot.inventory instanceof InventoryPlayer);
+        final boolean isTargetSlotFromCreativeTabs = isPlayerOnCreativeInventory && !(targetSlot.inventory instanceof PlayerInventory);
 
 
 
@@ -73,7 +74,7 @@ public class SlotActionResolver_TrySwapWithOffHandSlot extends SlotActionResolve
             this._needsServerSide = true;
 
             /**
-             * Reference: {@link net.minecraft.inventory.Container#slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player),
+             * Reference: {@link Container#slotClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player),
              * where ClickType == ClickType.SWAP and dragType == 0 to 9, the hotbar slot}
              */
 
@@ -88,7 +89,7 @@ public class SlotActionResolver_TrySwapWithOffHandSlot extends SlotActionResolve
             } else if (slotStack.isEmpty() && targetSlot.isItemValid(offHandStack)) {
                 // --- Places item on the target slot
                 if (offHandStack.getCount() > maxItemsAllowed) {
-                    targetSlot.putStack(offHandStack.splitStack(maxItemsAllowed));
+                    targetSlot.putStack(offHandStack.split(maxItemsAllowed));
                 } else {
                     targetSlot.putStack(offHandStack);
                     player.inventory.setInventorySlotContents(OFF_HAND_SLOT_INDEX, ItemStack.EMPTY);
@@ -98,7 +99,7 @@ public class SlotActionResolver_TrySwapWithOffHandSlot extends SlotActionResolve
             } else if (targetSlot.canTakeStack(player) && targetSlot.isItemValid(offHandStack)) {
                 // --- Swap slots
                 if (offHandStack.getCount() > maxItemsAllowed) {
-                    targetSlot.putStack(offHandStack.splitStack(maxItemsAllowed));
+                    targetSlot.putStack(offHandStack.split(maxItemsAllowed));
                     targetSlot.onTake(player, slotStack);
                     if (!player.inventory.addItemStackToInventory(slotStack)) {
                         player.dropItem(slotStack, true);

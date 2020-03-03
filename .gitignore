@@ -9,6 +9,7 @@ repo/
 *.launch
 
 *.class
+.idea
 
 # Package Files #
 *.jar

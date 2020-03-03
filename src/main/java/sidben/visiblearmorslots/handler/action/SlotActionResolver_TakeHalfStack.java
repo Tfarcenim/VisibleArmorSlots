@@ -1,7 +1,8 @@
 package sidben.visiblearmorslots.handler.action;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 
 
@@ -15,7 +16,7 @@ public class SlotActionResolver_TakeHalfStack extends SlotActionResolver
 
 
     @Override
-    public void handleClientSide(Slot targetSlot, EntityPlayer player)
+    public void handleClientSide(Slot targetSlot, PlayerEntity player)
     {
         this._needsServerSide = false;
         this.takeHalfStack(targetSlot, player);
@@ -23,16 +24,16 @@ public class SlotActionResolver_TakeHalfStack extends SlotActionResolver
 
 
     @Override
-    public void handleServerSide(Slot targetSlot, EntityPlayer player)
+    public void handleServerSide(Slot targetSlot, PlayerEntity player)
     {
         this.takeHalfStack(targetSlot, player);
     }
 
 
     /**
-     * Reference: {@link net.minecraft.inventory.Container#slotClick() Container.slotClick()}
+     * Reference: {@link Container#slotClick() Container.slotClick()}
      */
-    private void takeHalfStack(Slot targetSlot, EntityPlayer player)
+    private void takeHalfStack(Slot targetSlot, PlayerEntity player)
     {
         if (targetSlot.getStack().isEmpty() || !targetSlot.canTakeStack(player)) { return; }
 

@@ -1,7 +1,7 @@
 package sidben.visiblearmorslots.handler.action;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 
 
@@ -30,7 +30,7 @@ public class SlotActionResolver_TrySwapSlotWithHotbar extends SlotActionResolver
 
 
     @Override
-    public void handleClientSide(Slot targetSlot, EntityPlayer player)
+    public void handleClientSide(Slot targetSlot, PlayerEntity player)
     {
         this._needsServerSide = false;
         this.swapSlotWithPlayerInventory(targetSlot, player);
@@ -38,13 +38,13 @@ public class SlotActionResolver_TrySwapSlotWithHotbar extends SlotActionResolver
 
 
     @Override
-    public void handleServerSide(Slot targetSlot, EntityPlayer player)
+    public void handleServerSide(Slot targetSlot, PlayerEntity player)
     {
         this.swapSlotWithPlayerInventory(targetSlot, player);
     }
 
 
-    private void swapSlotWithPlayerInventory(Slot targetSlot, EntityPlayer player)
+    private void swapSlotWithPlayerInventory(Slot targetSlot, PlayerEntity player)
     {
         if (player.openContainer == null || player.openContainer.inventorySlots.size() < 9) { return; }
 
