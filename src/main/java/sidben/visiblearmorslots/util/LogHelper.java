@@ -3,7 +3,6 @@ package sidben.visiblearmorslots.util;
 import java.util.IllegalFormatException;
 import org.apache.logging.log4j.Level;
 import sidben.visiblearmorslots.main.ModConfig;
-import sidben.visiblearmorslots.main.Reference;
 
 
 

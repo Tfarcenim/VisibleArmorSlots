@@ -10,6 +10,8 @@ repo/
 
 *.class
 .idea
+run
+out
 
 # Package Files #
 *.jar

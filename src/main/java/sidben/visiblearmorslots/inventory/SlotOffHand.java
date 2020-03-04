@@ -14,9 +14,7 @@ public class SlotOffHand extends Slot
         super(inventoryIn, index, xPosition, yPosition);
     }
 
-
     @Override
-    @OnlyIn(Dist.CLIENT)
     public String getSlotTexture()
     {
         return "minecraft:items/empty_armor_slot_shield";

@@ -3,34 +3,44 @@ package sidben.visiblearmorslots.network;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 import sidben.visiblearmorslots.handler.action.SlotActionManager;
 import sidben.visiblearmorslots.inventory.SlotArmor;
 import sidben.visiblearmorslots.inventory.SlotOffHand;
 import sidben.visiblearmorslots.util.LogHelper;
 
+import java.util.function.Supplier;
 
-public class MessageSlotAction {
+
+public class C2SMessageSlotAction {
 
 	// ---------------------------------------------
 	// Fields
 	// ---------------------------------------------
 
-	private int _actionResolverIndex = 0;
-	private int _playerContainerSlotIndex = -1;
-	private boolean _usePlayerInventory = true;
+	private int actionResolverIndex = 0;
+	private int playerContainerSlotIndex = -1;
+	private boolean usePlayerInventory = true;
 
 
 	// ---------------------------------------------
 	// Constructors
 	// ---------------------------------------------
 
-	public MessageSlotAction() {
+	public C2SMessageSlotAction() {
 	}
 
-	public MessageSlotAction(Integer resolverIndex, Slot targetSlot) {
-		this._playerContainerSlotIndex = targetSlot.slotNumber;
-		this._actionResolverIndex = resolverIndex;
-		this._usePlayerInventory = targetSlot instanceof SlotArmor || targetSlot instanceof SlotOffHand;
+	public C2SMessageSlotAction(int resolverIndex, Slot targetSlot) {
+		this.playerContainerSlotIndex = targetSlot.slotNumber;
+		this.actionResolverIndex = resolverIndex;
+		this.usePlayerInventory = targetSlot instanceof SlotArmor || targetSlot instanceof SlotOffHand;
+	}
+
+	public C2SMessageSlotAction(PacketBuffer buffer) {
+		playerContainerSlotIndex = buffer.readInt();
+		actionResolverIndex = buffer.readInt();
+		usePlayerInventory = buffer.readBoolean();
 	}
 
 
@@ -39,11 +49,11 @@ public class MessageSlotAction {
 	// ---------------------------------------------
 
 	public int getContainerSlotIndex() {
-		return this._playerContainerSlotIndex;
+		return this.playerContainerSlotIndex;
 	}
 
 	public int getActionResolverIndex() {
-		return this._actionResolverIndex;
+		return this.actionResolverIndex;
 	}
 
 	/**
@@ -53,8 +63,8 @@ public class MessageSlotAction {
 	 * <p>
 	 * If FALSE, the container slot index must be used with player.openContainer.
 	 */
-	public boolean getUsePlayerInventory() {
-		return this._usePlayerInventory;
+	public boolean usePlayerInventory() {
+		return this.usePlayerInventory;
 	}
 
 
@@ -62,60 +72,36 @@ public class MessageSlotAction {
 	// Methods
 	// ---------------------------------------------
 
-	@Override
-	public void fromBytes(ByteBuf buf) {
-		this._playerContainerSlotIndex = buf.readInt();
-		this._actionResolverIndex = buf.readInt();
-		this._usePlayerInventory = buf.readBoolean();
+
+	public void encode(ByteBuf buf) {
+		buf.writeInt(this.playerContainerSlotIndex);
+		buf.writeInt(this.actionResolverIndex);
+		buf.writeBoolean(this.usePlayerInventory);
 	}
-
-
-	@Override
-	public void toBytes(ByteBuf buf) {
-		buf.writeInt(this._playerContainerSlotIndex);
-		buf.writeInt(this._actionResolverIndex);
-		buf.writeBoolean(this._usePlayerInventory);
-	}
-
 
 	@Override
 	public String toString() {
 		return String.format("MessageSlotAction [slot index=%d, resolver index=%d, use player inventory=%s]", this.getContainerSlotIndex(), this.getActionResolverIndex(),
-						this.getUsePlayerInventory());
+						this.usePlayerInventory());
 	}
 
 
-	public static class Handler implements IMessageHandler<MessageSlotAction, IMessage> {
 
-		@Override
-		public IMessage onMessage(MessageSlotAction message, MessageContext ctx) {
-			LogHelper.trace("IMessage.onMessage - %s", message);
-
-			final PlayerEntity player = ctx.getServerHandler().playerEntity;
-			if (player == null) {
-				return null;
-			}
-			player.getServer().addScheduledTask(() -> handle(message, ctx));
-
-			return null;
-		}
-
-
-		private void handle(MessageSlotAction message, MessageContext ctx) {
+		public void handle(Supplier<NetworkEvent.Context> ctx) {
 			LogHelper.trace("IMessage.handle");
 
-			final PlayerEntity player = ctx.getServerHandler().playerEntity;
-			final int actionIndex = message.getActionResolverIndex();
+			final PlayerEntity player = ctx.get().getSender();
+			final int actionIndex = getActionResolverIndex();
 			Slot targetSlot = null;
 
 			// NOTE: The extra slots are not part of the openContainer, so I need to
 			// find them directly on the player inventory.
 			try {
-				if (message.getUsePlayerInventory()) {
-					targetSlot = player.inventoryContainer.getSlot(message.getContainerSlotIndex());
+				if (usePlayerInventory()) {
+					targetSlot = player.container.getSlot(getContainerSlotIndex());
 				} else {
 					if (player.openContainer != null) {
-						targetSlot = player.openContainer.getSlot(message.getContainerSlotIndex());
+						targetSlot = player.openContainer.getSlot(getContainerSlotIndex());
 					}
 				}
 			} catch (final Exception e1) {
@@ -126,12 +112,6 @@ public class MessageSlotAction {
 			if (player == null || targetSlot == null) {
 				return;
 			}
-
-
 			SlotActionManager.instance.processActionOnServer(actionIndex, targetSlot, player);
 		}
-
-
 	}
-
-}

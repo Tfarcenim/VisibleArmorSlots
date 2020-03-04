@@ -38,7 +38,7 @@ public class SlotActionResolver_TryPlacingOneItemOnSlot extends SlotActionResolv
             // Slot is empty, place a new stack of one
             final boolean canPlaceOnSlot = targetSlot.isItemValid(mouseStack) && !mouseStack.isEmpty();
             if (canPlaceOnSlot) {
-                targetSlot.putStack(mouseStack.splitStack(1));
+                targetSlot.putStack(mouseStack.split(1));
                 this._needsServerSide = true;
             }
 

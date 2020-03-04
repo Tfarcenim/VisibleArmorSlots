@@ -15,7 +15,7 @@ import sidben.visiblearmorslots.util.LogHelper;
 public class SlotActionManager {
 
 	private final String CREATIVE_CONTAINER_NAME = "ContainerCreative";
-	private final Map<Integer, ISlotActionResolver> _actionResolvers = new HashMap<Integer, ISlotActionResolver>();
+	private final Map<Integer, ISlotActionResolver> slotActionResolver = new HashMap<Integer, ISlotActionResolver>();
 
 	public static SlotActionManager instance = new SlotActionManager();
 
@@ -23,23 +23,23 @@ public class SlotActionManager {
 		int index = 0;
 
 		// NOTE: The order is essential
-		_actionResolvers.put(index++, new SlotActionResolver_Debug());
-		_actionResolvers.put(index++, new SlotActionResolver_Clone());
-		_actionResolvers.put(index++, new SlotActionResolver_TryPlacingOneItemOnSlot());
-		_actionResolvers.put(index++, new SlotActionResolver_QuickTakeFromSlot());
-		_actionResolvers.put(index++, new SlotActionResolver_TakeHalfStack());
-		_actionResolvers.put(index++, new SlotActionResolver_TrySwapMouseWithSlot());
+		slotActionResolver.put(index++, new SlotActionResolver_Debug());
+		slotActionResolver.put(index++, new SlotActionResolver_Clone());
+		slotActionResolver.put(index++, new SlotActionResolver_TryPlacingOneItemOnSlot());
+		slotActionResolver.put(index++, new SlotActionResolver_QuickTakeFromSlot());
+		slotActionResolver.put(index++, new SlotActionResolver_TakeHalfStack());
+		slotActionResolver.put(index++, new SlotActionResolver_TrySwapMouseWithSlot());
 		for (int j = 0; j < 9; j++) {
-			_actionResolvers.put(index++, new SlotActionResolver_TrySwapSlotWithHotbar(j));
+			slotActionResolver.put(index++, new SlotActionResolver_TrySwapSlotWithHotbar(j));
 		}
-		_actionResolvers.put(index++, new SlotActionResolver_TrySwapWithOffHandSlot());
-		_actionResolvers.put(index++, new SlotActionResolver_DoesNothing());
+		slotActionResolver.put(index++, new SlotActionResolver_TrySwapWithOffHandSlot());
+		slotActionResolver.put(index++, new SlotActionResolver_DoesNothing());
 	}
 
 
 	private Map.Entry<Integer, ISlotActionResolver> getResolverForAction(SlotActionType actionType) {
-		// for (ISlotActionResolver actionResolver : this._actionResolvers.)
-		for (final Map.Entry<Integer, ISlotActionResolver> entry : this._actionResolvers.entrySet()) {
+		// for (ISlotActionResolver actionResolver : this.slotActionResolver.)
+		for (final Map.Entry<Integer, ISlotActionResolver> entry : this.slotActionResolver.entrySet()) {
 			if (entry.getValue().isSatisfiedBy(actionType)) {
 				LogHelper.trace("SlotActionManager: Using [%s], index %d, to resolve %s", entry.getValue(), entry.getKey(), actionType);
 				return entry;
@@ -50,7 +50,7 @@ public class SlotActionManager {
 	}
 
 	private ISlotActionResolver getResolverByIndex(int actionResolverIndex) {
-		final ISlotActionResolver actionResolver = this._actionResolvers.getOrDefault(actionResolverIndex, new SlotActionResolver_DoesNothing());
+		final ISlotActionResolver actionResolver = this.slotActionResolver.getOrDefault(actionResolverIndex, new SlotActionResolver_DoesNothing());
 		LogHelper.trace("SlotActionManager: Using [%s] to resolve index %d", actionResolver, actionResolverIndex);
 		return actionResolver;
 	}
@@ -93,6 +93,4 @@ public class SlotActionManager {
 			}
 		}
 	}
-
-
 }

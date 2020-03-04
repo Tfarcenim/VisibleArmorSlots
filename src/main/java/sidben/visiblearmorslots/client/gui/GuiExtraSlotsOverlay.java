@@ -19,12 +19,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
+import sidben.visiblearmorslots.VisibleArmorSlots;
 import sidben.visiblearmorslots.client.gui.InfoExtraSlots.EnumSlotType;
 import sidben.visiblearmorslots.handler.action.SlotActionManager;
 import sidben.visiblearmorslots.handler.action.SlotActionType;
 import sidben.visiblearmorslots.inventory.SlotArmor;
 import sidben.visiblearmorslots.inventory.SlotOffHand;
-import sidben.visiblearmorslots.main.Reference;
 import sidben.visiblearmorslots.util.GuiUtil;
 import sidben.visiblearmorslots.util.LogHelper;
 
@@ -41,7 +41,7 @@ import java.util.List;
  */
 public class GuiExtraSlotsOverlay extends AbstractGui {
 
-	private static final ResourceLocation GUI_EXTRA_SLOTS = new ResourceLocation(Reference.MOD_ID + ":textures/gui/extra-slots.png");
+	private static final ResourceLocation GUI_EXTRA_SLOTS = new ResourceLocation(VisibleArmorSlots.MOD_ID + ":textures/gui/extra-slots.png");
 	public static final int GUI_WIDTH = 24;
 	public static final int GUI_HEIGHT = 100;
 
@@ -68,10 +68,10 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 
 
 	public GuiExtraSlotsOverlay() {
-		supportedSlotsInfo = Lists.<InfoExtraSlots>newArrayList();
+		supportedSlotsInfo = Lists.newArrayList();
 		loadSupportedSlotsInfo(supportedSlotsInfo);
 
-		extraSlots = Lists.<Slot>newArrayList();
+		extraSlots = Lists.newArrayList();
 
 		this.mc = Minecraft.getInstance();
 		this.itemRender = mc.getItemRenderer();
@@ -96,7 +96,7 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 
 
 	public void refreshExtraSlotsInfo(PlayerInventory inventoryplayer) {
-		extraSlots = Lists.<Slot>newArrayList();
+		extraSlots = Lists.newArrayList();
 
 		for (final InfoExtraSlots slotInfo : supportedSlotsInfo) {
 			Slot extraSlot = null;
@@ -321,7 +321,7 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 			this.mouseClicked(mouseX, mouseY, this.eventButton);
 		} else if (clickedButton != -1) {
 			this.eventButton = -1;
-			this.mouseReleased(mouseX, mouseY, clickedButton);
+		//	this.mouseReleased(mouseX, mouseY, clickedButton);
 		} else if (this.eventButton != -1 && this.lastMouseEvent > 0L) {
 			final long l = System.currentTimeMillis() - this.lastMouseEvent;
 			this.mouseClickMove(mouseX, mouseY, this.eventButton, l);

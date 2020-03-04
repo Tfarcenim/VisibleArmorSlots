@@ -107,7 +107,7 @@ public class SlotActionType
      */
     public static SlotActionType create(PlayerEntity player, Slot slot, boolean shiftPressed, EnumMouseAction mouseButton)
     {
-        if (player != null && slot != null) { return new SlotActionType(!player.inventory.getItemStack().isEmpty(), player.capabilities.isCreativeMode, slot.getHasStack(), shiftPressed, mouseButton,
+        if (player != null && slot != null) { return new SlotActionType(!player.inventory.getItemStack().isEmpty(), player.abilities.isCreativeMode, slot.getHasStack(), shiftPressed, mouseButton,
                 EnumKeyboardAction.INVALID); }
 
         return SlotActionType.EMPTY;
@@ -125,7 +125,7 @@ public class SlotActionType
      */
     public static SlotActionType create(PlayerEntity player, Slot slot, EnumKeyboardAction keyboardKey)
     {
-        if (player != null && slot != null) { return new SlotActionType(!player.inventory.getItemStack().isEmpty(), player.capabilities.isCreativeMode, slot.getHasStack(), false,
+        if (player != null && slot != null) { return new SlotActionType(!player.inventory.getItemStack().isEmpty(), player.abilities.isCreativeMode, slot.getHasStack(), false,
                 EnumMouseAction.INVALID, keyboardKey); }
 
         return SlotActionType.EMPTY;

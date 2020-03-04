@@ -17,9 +17,10 @@ import net.minecraftforge.client.event.GuiScreenEvent.PotionShiftEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import sidben.visiblearmorslots.VisibleArmorSlots;
 import sidben.visiblearmorslots.client.gui.GuiExtraSlotsOverlay;
 import sidben.visiblearmorslots.main.ModConfig;
-import sidben.visiblearmorslots.main.Reference;
 import sidben.visiblearmorslots.util.LogHelper;
 
 
@@ -117,17 +118,6 @@ public class EventDelegatorGuiOverlay {
 
 		// NOTE: even if the gui overlay is not visible, it still get the basic config to avoid crashes and leaks
 		if (gui != null) {
-            /*
-            LogHelper.trace("EventDelegatorGuiOverlay.onInitGuiEvent.Post() - %s", gui);
-            LogHelper.trace("    is GuiContainer: %s, is GuiInventory: %s", (gui instanceof GuiContainer), (gui instanceof GuiInventory));
-            if (gui instanceof GuiContainer) {
-                LogHelper.trace("    guiLeft: %d, guiTop: %d, xSize: %d, ySize: %d, inventory: %s", ((GuiContainer) gui).getGuiLeft(), ((GuiContainer) gui).getGuiTop(),
-                        ((GuiContainer) gui).getXSize(), ((GuiContainer) gui).getYSize(), ((GuiContainer) gui).inventorySlots);
-                if (((GuiContainer) gui).inventorySlots != null) {
-                    LogHelper.trace("    inventory size: %s", ((GuiContainer) gui).inventorySlots.inventorySlots.size());
-                }
-            }
-            */
 
 			this.getGuiOverlay().setWorldAndResolution(gui.width, gui.height);
 			this.getGuiOverlay().setExternalGuiPosition(gui);
@@ -159,18 +149,15 @@ public class EventDelegatorGuiOverlay {
 
 	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
-	public void onBackgroundDrawEvent(BackgroundDrawnEvent event) {
+	public void onBackgroundDrawEvent(DrawScreenEvent event) {
 		if (!this.shouldDisplayGuiOverlay(event.getGui())) {
 			return;
 		}
 
 		this.getGuiOverlay().drawBackground();
 
-		final int scaledWidth = Minecraft.getInstance().mainWindow.getScaledWidth();
-		final int scaledHeight = Minecraft.getInstance().mainWindow.getScaledHeight();
-		double mouseX = Minecraft.getInstance().mouseHelper.getMouseX() * scaledWidth / event.getGui().getMinecraft().mainWindow.getFramebufferWidth();
-		double mouseY = scaledHeight - Minecraft.getInstance().mouseHelper.getMouseY() * scaledHeight /
-						event.getGui().getMinecraft().mainWindow.getFramebufferHeight() - 1;
+		double mouseX = event.getMouseX();
+		double mouseY = event.getMouseY();
 
 		this.getGuiOverlay().drawScreen(mouseX, mouseY);
 	}
@@ -197,20 +184,19 @@ public class EventDelegatorGuiOverlay {
 
 
 	@SubscribeEvent
-	public void onMouseInputEvent(MouseInputEvent event) {
+	public void onMouseInputEvent(GuiScreenEvent.MouseClickedEvent.Pre event) {
 		// Only accepts clicks - 0 = left, 1 = right, 2 = middle
 		// if (event..getEventButton() < 0) { return; }
 		if (!this.shouldDisplayGuiOverlay(event.getGui())) {
 			return;
 		}
 
-		final int scaledWidth = Minecraft.getInstance().mainWindow.getScaledWidth();
-		final int scaledHeight = Minecraft.getInstance().mainWindow.getScaledHeight();
-		double mouseX = Minecraft.getInstance().mouseHelper.getMouseX() * scaledWidth / event.getGui().getMinecraft().mainWindow.getFramebufferWidth();
-		double mouseY = scaledHeight - Minecraft.getInstance().mouseHelper.getMouseY() * scaledHeight /
-						event.getGui().getMinecraft().mainWindow.getFramebufferHeight() - 1;
+		double mouseX = event.getMouseX();
+		double mouseY = event.getMouseY();
 
-		final boolean shouldCancelEvent = this.getGuiOverlay().handleMouseInput(mouseX,mouseY);
+		int key = event.getButton();
+
+		final boolean shouldCancelEvent = this.getGuiOverlay().handleMouseInput(mouseX,mouseY,key);
 			// Prevents clicks on the gui overlay dropping items on the world
 			event.setCanceled(shouldCancelEvent);
 	}
@@ -235,7 +221,7 @@ public class EventDelegatorGuiOverlay {
 
 	@SubscribeEvent
 	public void onConfigurationChangedEvent(ConfigChangedEvent.OnConfigChangedEvent event) {
-		if (event.getModID().equalsIgnoreCase(Reference.MOD_ID)) {
+		if (event.getModID().equalsIgnoreCase(VisibleArmorSlots.MOD_ID)) {
 			// Refresh the display parameters when the config changes
 			_cacheDisplayParams = new HashMap<String, InfoGuiOverlayDisplayParams>();
 		}

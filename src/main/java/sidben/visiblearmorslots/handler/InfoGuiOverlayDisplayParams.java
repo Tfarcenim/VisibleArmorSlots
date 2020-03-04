@@ -81,7 +81,7 @@ public class InfoGuiOverlayDisplayParams
 
     protected final static boolean isBlacklisted(ContainerScreen gui)
     {
-        if (ModConfig.blacklistedModPackages().length > 0) {
+        if (ModConfig.blacklistedModPackages().size() > 0) {
             final String className = gui.getClass().getName();
 
             for (final String blacklisted : ModConfig.blacklistedModPackages()) {
