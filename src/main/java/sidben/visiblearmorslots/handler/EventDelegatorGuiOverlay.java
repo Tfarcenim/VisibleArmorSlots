@@ -9,11 +9,15 @@ import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.BackgroundDrawnEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.MouseClickedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.MouseInputEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.MouseReleasedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.PotionShiftEvent;
+import net.minecraftforge.client.event.InputEvent.RawMouseEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -184,23 +188,52 @@ public class EventDelegatorGuiOverlay {
 
 
 	@SubscribeEvent
-	public void onMouseInputEvent(GuiScreenEvent.MouseClickedEvent.Pre event) {
+	public void onMouseInputEvent(MouseClickedEvent event) {
+		final Minecraft mc = Minecraft.getInstance();
+		final MouseHelper mouse = mc.mouseHelper;
+		final Screen gui = event.getGui();
+		
+		
 		// Only accepts clicks - 0 = left, 1 = right, 2 = middle
 		// if (event..getEventButton() < 0) { return; }
-		if (!this.shouldDisplayGuiOverlay(event.getGui())) {
+		if (!this.shouldDisplayGuiOverlay(gui)) {
 			return;
 		}
+		
+		double mouseX = mouse.getMouseX();
+		double mouseY = mouse.getMouseY();
 
-		double mouseX = event.getMouseX();
-		double mouseY = event.getMouseY();
-
-		int key = event.getButton();
-
-		final boolean shouldCancelEvent = this.getGuiOverlay().handleMouseInput(mouseX,mouseY,key);
+		final boolean shouldCancelEvent = this.getGuiOverlay().handleMouseInput(mouseX, mouseY, event.getButton());
 			// Prevents clicks on the gui overlay dropping items on the world
-			event.setCanceled(shouldCancelEvent);
+			if(shouldCancelEvent) {
+				event.setCanceled(shouldCancelEvent);
+				this.getGuiOverlay().handleMouseInput(mouseX, mouseY, event.getButton());
+			}
 	}
+	
+	@SubscribeEvent
+	public void onMouseReleasedEvent(MouseReleasedEvent event) {
+		final Minecraft mc = Minecraft.getInstance();
+		final MouseHelper mouse = mc.mouseHelper;
+		final Screen gui = event.getGui();
+		
+		
+		// Only accepts clicks - 0 = left, 1 = right, 2 = middle
+		// if (event..getEventButton() < 0) { return; }
+		if (!this.shouldDisplayGuiOverlay(gui)) {
+			return;
+		}
+		
+		double mouseX = mouse.getMouseX();
+		double mouseY = mouse.getMouseY();
 
+		final boolean shouldCancelEvent = this.getGuiOverlay().isMouseOverGui(mouseX, mouseY);
+			// Prevents clicks on the gui overlay dropping items on the world
+			if(shouldCancelEvent) {
+				event.setCanceled(shouldCancelEvent);
+				this.getGuiOverlay().handleMouseInput(mouseX, mouseY, event.getButton());
+			}
+	}
 
 	@SubscribeEvent
 	public void onKeyboardInputEvent(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
