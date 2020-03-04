@@ -2,6 +2,8 @@ package sidben.visiblearmorslots.client.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -180,38 +182,30 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	 */
 	public void render(double mouseX, double mouseY) {
 		this.theSlot = null;
-
-		RenderHelper.enableGUIStandardItemLighting();
-
-
 		// Draw the slots
-		GlStateManager.pushMatrix();
-		GlStateManager.translated(this.guiLeft, this.guiTop, 0);
+		RenderSystem.pushMatrix();
+		RenderSystem.translated(this.guiLeft, this.guiTop, 0);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		for (final Slot slot : extraSlots) {
 			// Slot items
 			if (slot.isEnabled()) {
-				this.drawSlot(slot);
+				this.drawSlot(slot, mouseX, mouseY);
 			}
-
 			// Hover box
 			if (this.isMouseOverSlot(slot, mouseX, mouseY) && slot.isEnabled()) {
 				final int hoverX = slot.xPos;
 				final int hoverY = slot.yPos;
 				this.theSlot = slot;
-
-				GlStateManager.disableLighting();
-				GlStateManager.disableDepthTest();
-				GlStateManager.colorMask(true, true, true, false);
-				GuiUtil.drawGradientRect(hoverX, hoverY, hoverX + 16, hoverY + 16, -600, -2130706433, -2130706433);
-				GlStateManager.colorMask(true, true, true, true);
-				GlStateManager.enableLighting();
-				GlStateManager.enableDepthTest();
+				if (!slot.getHasStack()) {
+					GlStateManager.colorMask(true, true, true, false);
+					RenderSystem.enableBlend();
+					GuiUtil.drawGradientRect(hoverX, hoverY, hoverX + 16, hoverY + 16, 50, 0x80ffffff, 0x80ffffff);
+					GlStateManager.colorMask(true, true, true, true);
+				}
 			}
 		}
-		GlStateManager.popMatrix();
-		renderHoveredTooltip(mouseX,mouseY);
-
-		RenderHelper.disableStandardItemLighting();
+		RenderSystem.popMatrix();
+		renderHoveredTooltip(mouseX, mouseY);
 	}
 
 
@@ -229,7 +223,6 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.mc.getTextureManager().bindTexture(GUI_EXTRA_SLOTS);
 		this.blit(startX, startY, textureStartX, textureStartY, textureWidth, textureHeight);
-
 	}
 
 	/**
@@ -238,7 +231,6 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	public void renderHoveredTooltip(double mouseX, double mouseY) {
 		final PlayerInventory inventoryplayer = this.mc.player.inventory;
 		final ItemStack playerItemStack = inventoryplayer.getItemStack();
-
 		// Tooltip
 		if (playerItemStack.isEmpty() && this.theSlot != null && this.theSlot.getHasStack()) {
 			final ItemStack slotStack = this.theSlot.getStack();
@@ -247,46 +239,45 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	}
 
 
-	private void drawSlot(Slot slot) {
+	private void drawSlot(Slot slot, double mouseX, double mouseY) {
 		final int x = slot.xPos;
 		final int y = slot.yPos;
 		final ItemStack itemstack = slot.getStack();
+		this.setBlitOffset(0);
+		this.itemRender.zLevel = 100.0F;
+		boolean flag1 = isMouseOverSlot(slot, mouseX, mouseY);
 
 		// Slot background
 		if (itemstack.isEmpty()) {
-			final TextureAtlasSprite textureatlassprite = slot.getBackgroundSprite();
-
-			if (textureatlassprite != null) {
-				GlStateManager.disableLighting();
-				this.mc.getTextureManager().bindTexture(slot.getBackgroundLocation());
-				blit(x, y,blitOffset, 16, 16,textureatlassprite);
-				GlStateManager.enableLighting();
+			Pair<ResourceLocation, ResourceLocation> pair = slot.func_225517_c_();
+			if (pair != null) {
+				TextureAtlasSprite textureatlassprite = this.mc.getTextureGetter(pair.getFirst()).apply(pair.getSecond());
+				if (textureatlassprite != null) {
+					this.mc.getTextureManager().bindTexture(textureatlassprite.getAtlasTexture().getBasePath());
+					blit(x, y, getBlitOffset(), 16, 16, textureatlassprite);
+				}
 			}
 		}
 		// Slot item
 		else {
-			itemRender.renderItemAndEffectIntoGUI(mc.player, itemstack, x, y);
-			itemRender.renderItemOverlayIntoGUI(fontRenderer, itemstack, x, y, null);
+			{
+				itemRender.renderItemAndEffectIntoGUI(mc.player, itemstack, x, y);
+				itemRender.renderItemOverlayIntoGUI(fontRenderer, itemstack, x, y, null);
+				if (flag1) {
+					RenderSystem.disableDepthTest();
+					fill(x, y, x + 16, y + 16, -2130706433);
+					RenderSystem.enableDepthTest();
+				}
+			}
 		}
+		this.itemRender.zLevel = 0.0F;
+		this.setBlitOffset(0);
 	}
 
 
 	protected void renderToolTip(ItemStack stack, double x, double y) {
-		final List<ITextComponent> list = stack.getTooltip(this.mc.player,this.mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-
-		for (int i = 0; i < list.size(); ++i) {
-			if (i == 0) {
-				list.set(i,list.get(i).applyTextStyle(stack.getRarity().color));
-			} else {
-				list.set(i, list.get(i).applyTextStyle(TextFormatting.GRAY));
-			}
-		}
-
-		FontRenderer font = stack.getItem().getFontRenderer(stack);
-		font = font == null ? fontRenderer : font;
-		net.minecraftforge.fml.client.config.GuiUtils.preItemToolTip(stack);
-		GuiUtil.drawHoveringText(list,(int) x,(int) y, this.screenWidth, this.screenHeight, -1, font);
-		net.minecraftforge.fml.client.config.GuiUtils.postItemToolTip();
+		final List<ITextComponent> list = stack.getTooltip(this.mc.player, this.mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
+		GuiUtil.drawHoveringText(list, (int) x, (int) y, mc.getMainWindow().getScaledWidth(), mc.getMainWindow().getScaledHeight(), 100, mc.fontRenderer);
 	}
 
 
@@ -295,14 +286,12 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	// -----------------------------------------------------------
 
 	/**
-	 * @return Should cancel the mouse event (since it was handled by this gui).
 	 * @param mouseX
 	 * @param mouseY
+	 * @return Should cancel the mouse event (since it was handled by this gui).
 	 */
 
-	public boolean handleMouseInput(double mouseX, double mouseY,int clickedButton) {
-		InputMappings.Input mouseKey = InputMappings.Type.MOUSE.getOrMakeInput(clickedButton);
-
+	public boolean handleMouseInput(double mouseX, double mouseY, int clickedButton) {
 		if (!this.isMouseOverGui(mouseX, mouseY)) {
 			return false;
 		}
@@ -382,12 +371,12 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	public boolean mouseReleased(double mouseX, double mouseY, int clickedButton) {
 		// Needed to avoid clicks on the gui overlay being interpreted as clicks outside the open gui,
 		// causing the items on the mouse to drop.
-			if (!this.isMouseOverGui(mouseX, mouseY)) {
-				return false;
-			}
-
-			return true;
+		if (!this.isMouseOverGui(mouseX, mouseY)) {
+			return false;
 		}
+
+		return true;
+	}
 
 
 	// -----------------------------------------------------------
@@ -399,7 +388,7 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 		// TODO: Ignore this event on the anvil renaming (need to make nameField visible)
 
 		if (keyChar == 0 || keyChar >= 32) {
-			this.keyTyped(mouseX,mouseY,keyChar,scanCode);
+			this.keyTyped(mouseX, mouseY, keyChar, scanCode);
 			return true;
 		}
 		return false;
@@ -422,7 +411,7 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 		} else {
 			// test hotbar swap key
 			for (int i = 0; i < 9; i++) {
-				if (this.mc.gameSettings.keyBindsHotbar[i].isActiveAndMatches(InputMappings.getInputByCode(keyCode,scanCode))) {
+				if (this.mc.gameSettings.keyBindsHotbar[i].isActiveAndMatches(InputMappings.getInputByCode(keyCode, scanCode))) {
 					keyboardAction = SlotActionType.EnumKeyboardAction.createHotbar(i);
 					break;
 				}
@@ -484,7 +473,7 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	/**
 	 * Returns the slot at the given coordinates or null if there is none.
 	 */
-	private Slot getSlotAtPosition(double x,double y, boolean checkGuiOverlay, boolean checkExternalGui) {
+	private Slot getSlotAtPosition(double x, double y, boolean checkGuiOverlay, boolean checkExternalGui) {
 		if (checkGuiOverlay) {
 			for (final Slot internalSlot : extraSlots) {
 				if (this.isMouseOverSlot(internalSlot, x, y) && internalSlot.isEnabled()) {

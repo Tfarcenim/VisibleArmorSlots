@@ -5,7 +5,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.client.config.GuiUtils;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -27,16 +27,16 @@ public class GuiUtil extends AbstractGui {
 		private static final GuiUtil instance = new GuiUtil();
 
 		public static void drawGradientRect(int left, int top, int right, int bottom, int blitOffset, int startColor, int endColor) {
-			int oldBlitOffset = instance.blitOffset;
-			instance.blitOffset = blitOffset;
+			int oldBlitOffset = instance.getBlitOffset();
+			instance.setBlitOffset(blitOffset);
 			instance.fillGradient(left, top, right, bottom, startColor, endColor);
-			instance.blitOffset = oldBlitOffset;
+			instance.setBlitOffset(oldBlitOffset);
 		}
 
 		public static void renderTooltip(Screen screen, ItemStack itemStack, int x, int y) {
 			FontRenderer font = itemStack.getItem().getFontRenderer(itemStack);
-			net.minecraftforge.fml.client.config.GuiUtils.preItemToolTip(itemStack);
+			GuiUtils.preItemToolTip(itemStack);
 			screen.renderTooltip(screen.getTooltipFromItem(itemStack), x, y, (font == null ? screen.getMinecraft().fontRenderer : font));
-			net.minecraftforge.fml.client.config.GuiUtils.postItemToolTip();
+			GuiUtils.postItemToolTip();
 		}
 	}

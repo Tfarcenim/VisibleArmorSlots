@@ -11,8 +11,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.PotionShiftEvent;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.config.ModConfig.ModConfigEvent;
 import sidben.visiblearmorslots.VisibleArmorSlots;
 import sidben.visiblearmorslots.client.gui.GuiExtraSlotsOverlay;
 import sidben.visiblearmorslots.main.ModConfig;
@@ -210,18 +210,18 @@ public class EventDelegatorGuiOverlay {
 			return;
 		}
 
-		final int scaledWidth = Minecraft.getInstance().mainWindow.getScaledWidth();
-		final int scaledHeight = Minecraft.getInstance().mainWindow.getScaledHeight();
-		double mouseX = Minecraft.getInstance().mouseHelper.getMouseX() * scaledWidth / event.getGui().getMinecraft().mainWindow.getFramebufferWidth();
+		final int scaledWidth = Minecraft.getInstance().getMainWindow().getScaledWidth();
+		final int scaledHeight = Minecraft.getInstance().getMainWindow().getScaledHeight();
+		double mouseX = Minecraft.getInstance().mouseHelper.getMouseX() * scaledWidth / event.getGui().getMinecraft().getMainWindow().getFramebufferWidth();
 		double mouseY = scaledHeight - Minecraft.getInstance().mouseHelper.getMouseY() * scaledHeight /
-						event.getGui().getMinecraft().mainWindow.getFramebufferHeight() - 1;
+						event.getGui().getMinecraft().getMainWindow().getFramebufferHeight() - 1;
 
 		this.getGuiOverlay().keyPressed(mouseX,mouseY,event.getKeyCode(),event.getScanCode());
 	}
 
 	@SubscribeEvent
-	public void onConfigurationChangedEvent(ConfigChangedEvent.OnConfigChangedEvent event) {
-		if (event.getModID().equalsIgnoreCase(VisibleArmorSlots.MOD_ID)) {
+	public void onConfigurationChangedEvent(ModConfigEvent event) {
+		if (event.getConfig().getModId().equals(VisibleArmorSlots.MOD_ID)) {
 			// Refresh the display parameters when the config changes
 			_cacheDisplayParams = new HashMap<>();
 		}

@@ -1,27 +1,32 @@
 package sidben.visiblearmorslots.inventory;
 
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import javax.annotation.Nullable;
+
+import static net.minecraft.inventory.container.PlayerContainer.*;
 
 
 public class SlotArmor extends Slot {
 
-	private static final String[] ARMOR_SLOT_TEXTURES = new String[]{"item/empty_armor_slot_boots", "item/empty_armor_slot_leggings", "item/empty_armor_slot_chestplate", "item/empty_armor_slot_helmet"};
-
+	private static final ResourceLocation[] ARMOR_SLOT_TEXTURES = new ResourceLocation[]{EMPTY_ARMOR_SLOT_BOOTS, EMPTY_ARMOR_SLOT_LEGGINGS, EMPTY_ARMOR_SLOT_CHESTPLATE, EMPTY_ARMOR_SLOT_HELMET};
 
 	private static final EquipmentSlotType[] armorSloyArray = new EquipmentSlotType[]{EquipmentSlotType.FEET, EquipmentSlotType.LEGS, EquipmentSlotType.CHEST, EquipmentSlotType.HEAD};
 
 	private final PlayerEntity thePlayer;
-	private int slotTypeIndex = 0;
-
+	private int slotTypeIndex;
 
 	public SlotArmor(IInventory inventoryIn, int index, int xPosition, int yPosition) {
 		super(inventoryIn, index, xPosition, yPosition);
@@ -54,19 +59,15 @@ public class SlotArmor extends Slot {
 		}
 	}
 
-
-	@Override
-	@OnlyIn(Dist.CLIENT)
-	public String getSlotTexture() {
-		return ARMOR_SLOT_TEXTURES[slotTypeIndex];
-	}
-
-
 	@Override
 	public boolean canTakeStack(PlayerEntity player) {
 		final ItemStack itemstack = this.getStack();
 		return (itemstack.isEmpty() || player.isCreative() || !EnchantmentHelper.hasBindingCurse(itemstack)) && super.canTakeStack(player);
 	}
 
-
+	@Nullable
+	@Override
+	public Pair<ResourceLocation, ResourceLocation> func_225517_c_() {
+		return Pair.of(PlayerContainer.LOCATION_BLOCKS_TEXTURE, ARMOR_SLOT_TEXTURES[slotTypeIndex]);
+	}
 }
