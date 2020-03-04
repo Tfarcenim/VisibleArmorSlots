@@ -1,6 +1,7 @@
 package sidben.visiblearmorslots.handler;
 
 import javax.annotation.concurrent.Immutable;
+
 import net.minecraft.client.gui.screen.inventory.ChestScreen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.ShulkerBoxScreen;
@@ -10,96 +11,79 @@ import sidben.visiblearmorslots.util.LogHelper;
 
 
 @Immutable
-public class InfoGuiOverlayDisplayParams
-{
+public class InfoGuiOverlayDisplayParams {
 
-    public static InfoGuiOverlayDisplayParams EMPTY = new InfoGuiOverlayDisplayParams(0, 0, false);
+	public static InfoGuiOverlayDisplayParams EMPTY = new InfoGuiOverlayDisplayParams(0, 0, false);
 
+	private final int _guiLeft;
+	private final int _guiTop;
+	private final boolean _shouldDisplay;
 
+	public int getGuiLeft() {
+		return this._guiLeft;
+	}
 
-    private final int                         _guiLeft;
-    private final int                         _guiTop;
-    private final boolean                     _shouldDisplay;
+	public int getGuiTop() {
+		return this._guiTop;
+	}
 
+	public boolean getShouldDisplay() {
+		return this._shouldDisplay;
+	}
 
-    public int getGuiLeft()
-    {
-        return this._guiLeft;
-    }
+	public InfoGuiOverlayDisplayParams(int x, int y, boolean shouldDisplay) {
+		this._guiLeft = x;
+		this._guiTop = y;
+		this._shouldDisplay = shouldDisplay;
+	}
 
-    public int getGuiTop()
-    {
-        return this._guiTop;
-    }
-
-    public boolean getShouldDisplay()
-    {
-        return this._shouldDisplay;
-    }
-
-
-
-    public InfoGuiOverlayDisplayParams(int x, int y, boolean shouldDisplay) {
-        this._guiLeft = x;
-        this._guiTop = y;
-        this._shouldDisplay = shouldDisplay;
-    }
+	public static InfoGuiOverlayDisplayParams create(ContainerScreen gui, String guiClassName) {
+		if (gui == null) {
+			return InfoGuiOverlayDisplayParams.EMPTY;
+		}
 
 
+		// Check for blacklisted gui's
+		if (isBlacklisted(gui)) {
+			return InfoGuiOverlayDisplayParams.EMPTY;
+		}
 
-    public static InfoGuiOverlayDisplayParams create(ContainerScreen gui, String guiClassName)
-    {
-        if (gui == null) { return InfoGuiOverlayDisplayParams.EMPTY; }
+		int overlayX = 0;
+		int overlayY = 0;
 
-
-        // Check for blacklisted gui's
-        if (isBlacklisted(gui)) { return InfoGuiOverlayDisplayParams.EMPTY; }
-
-
-        int overlayX = 0;
-        int overlayY = 0;
-
-        if (ModConfig.extraSlotsSide().equals(ModConfig.POSITION_LEFT)) {
-            overlayX = gui.getGuiLeft() - GuiExtraSlotsOverlay.GUI_WIDTH - ModConfig.extraSlotsMargin();
-        } else if (ModConfig.extraSlotsSide().equals(ModConfig.POSITION_RIGHT)) {
-            overlayX = gui.getGuiLeft() + gui.getXSize() + ModConfig.extraSlotsMargin();
-        }
-        overlayY = gui.getGuiTop() + gui.getYSize() - GuiExtraSlotsOverlay.GUI_HEIGHT - 4;
+		if (ModConfig.extraSlotsSide().equals(ModConfig.POSITION_LEFT)) {
+			overlayX = gui.getGuiLeft() - GuiExtraSlotsOverlay.GUI_WIDTH - ModConfig.extraSlotsMargin();
+		} else if (ModConfig.extraSlotsSide().equals(ModConfig.POSITION_RIGHT)) {
+			overlayX = gui.getGuiLeft() + gui.getXSize() + ModConfig.extraSlotsMargin();
+		}
+		overlayY = gui.getGuiTop() + gui.getYSize() - GuiExtraSlotsOverlay.GUI_HEIGHT - 4;
 
 
-        // HOTFIX: Chest containers have their height (YSize) wrong
-        if (gui instanceof ChestScreen || gui instanceof ShulkerBoxScreen) {
-            overlayY -= 1;
-        }
+		// HOTFIX: Chest containers have their height (YSize) wrong
+		if (gui instanceof ChestScreen || gui instanceof ShulkerBoxScreen) {
+			overlayY -= 1;
+		}
 
+		final InfoGuiOverlayDisplayParams displayParams = new InfoGuiOverlayDisplayParams(overlayX, overlayY, true);
+		return displayParams;
+	}
 
-        final InfoGuiOverlayDisplayParams displayParams = new InfoGuiOverlayDisplayParams(overlayX, overlayY, true);
-        return displayParams;
-    }
+	protected static boolean isBlacklisted(ContainerScreen gui) {
+		if (ModConfig.blacklistedModPackages().size() > 0) {
+			final String className = gui.getClass().getName();
 
+			for (final String blacklisted : ModConfig.blacklistedModPackages()) {
+				if (className.startsWith(blacklisted + ".")) {
+					LogHelper.trace("InfoGuiOverlayDisplayParams: This gui is blacklisted: [%s]", className);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
-
-    protected final static boolean isBlacklisted(ContainerScreen gui)
-    {
-        if (ModConfig.blacklistedModPackages().size() > 0) {
-            final String className = gui.getClass().getName();
-
-            for (final String blacklisted : ModConfig.blacklistedModPackages()) {
-                if (className.startsWith(blacklisted + ".")) {
-                    LogHelper.trace("InfoGuiOverlayDisplayParams: This gui is blacklisted: [%s]", className);
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-
-
-    @Override
-    public String toString()
-    {
-        return String.format("InfoGuiOverlayDisplayParams: [x = %d, y = %d, visible = %s]", this.getGuiLeft(), this.getGuiTop(), this.getShouldDisplay());
-    }
+	@Override
+	public String toString() {
+		return String.format("InfoGuiOverlayDisplayParams: [x = %d, y = %d, visible = %s]", this.getGuiLeft(), this.getGuiTop(), this.getShouldDisplay());
+	}
 }

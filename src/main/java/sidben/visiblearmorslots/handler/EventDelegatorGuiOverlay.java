@@ -2,22 +2,17 @@ package sidben.visiblearmorslots.handler;
 
 import java.util.HashMap;
 
-import net.minecraft.client.MouseHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.InventoryScreen;
-import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.GuiContainerEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.GuiScreenEvent.BackgroundDrawnEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
-import net.minecraftforge.client.event.GuiScreenEvent.MouseInputEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.PotionShiftEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import sidben.visiblearmorslots.VisibleArmorSlots;
 import sidben.visiblearmorslots.client.gui.GuiExtraSlotsOverlay;
 import sidben.visiblearmorslots.main.ModConfig;
@@ -100,7 +95,6 @@ public class EventDelegatorGuiOverlay {
 		return displayParams;
 	}
 
-
 	// -----------------------------------------------------------
 	// Event handlers
 	// -----------------------------------------------------------
@@ -146,33 +140,24 @@ public class EventDelegatorGuiOverlay {
 		}
 	}
 
-
 	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
-	public void onBackgroundDrawEvent(DrawScreenEvent event) {
-		if (!this.shouldDisplayGuiOverlay(event.getGui())) {
+	public void onBackgroundDrawEvent(GuiContainerEvent.DrawBackground event) {
+		if (!this.shouldDisplayGuiOverlay(event.getGuiContainer())) {
 			return;
 		}
-
-		this.getGuiOverlay().drawBackground();
-
 		double mouseX = event.getMouseX();
 		double mouseY = event.getMouseY();
 
-		this.getGuiOverlay().drawScreen(mouseX, mouseY);
+		this.getGuiOverlay().drawBackground(mouseX,mouseY);
 	}
 
-
 	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
 	public void onDrawScreenEventPost(DrawScreenEvent.Post event) {
 		if (!this.shouldDisplayGuiOverlay(event.getGui())) {
 			return;
 		}
-
-		this.getGuiOverlay().drawForeground(event.getMouseX(), event.getMouseY());
+		this.getGuiOverlay().render(event.getMouseX(), event.getMouseY());
 	}
-
 
 	@SubscribeEvent
 	public void onPotionShiftEvent(PotionShiftEvent event) {
@@ -182,9 +167,8 @@ public class EventDelegatorGuiOverlay {
 		this.getGuiOverlay().setPotionShiftState(true);
 	}
 
-
 	@SubscribeEvent
-	public void onMouseInputEvent(GuiScreenEvent.MouseClickedEvent.Pre event) {
+	public void onMouseClickedEvent(GuiScreenEvent.MouseClickedEvent.Pre event) {
 		// Only accepts clicks - 0 = left, 1 = right, 2 = middle
 		// if (event..getEventButton() < 0) { return; }
 		if (!this.shouldDisplayGuiOverlay(event.getGui())) {
@@ -201,13 +185,30 @@ public class EventDelegatorGuiOverlay {
 			event.setCanceled(shouldCancelEvent);
 	}
 
+	@SubscribeEvent
+	public void onMouseReleasedEvent(GuiScreenEvent.MouseReleasedEvent.Pre event) {
+		// Only accepts clicks - 0 = left, 1 = right, 2 = middle
+		// if (event..getEventButton() < 0) { return; }
+		if (!this.shouldDisplayGuiOverlay(event.getGui())) {
+			return;
+		}
+
+		double mouseX = event.getMouseX();
+		double mouseY = event.getMouseY();
+
+		int key = event.getButton();
+
+		final boolean shouldCancelEvent = this.getGuiOverlay().mouseReleased(mouseX,mouseY,key);
+		// Prevents clicks on the gui overlay dropping items on the world
+		event.setCanceled(shouldCancelEvent);
+	}
+
 
 	@SubscribeEvent
 	public void onKeyboardInputEvent(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
 		if (!this.shouldDisplayGuiOverlay(event.getGui())) {
 			return;
 		}
-
 
 		final int scaledWidth = Minecraft.getInstance().mainWindow.getScaledWidth();
 		final int scaledHeight = Minecraft.getInstance().mainWindow.getScaledHeight();
@@ -218,14 +219,11 @@ public class EventDelegatorGuiOverlay {
 		this.getGuiOverlay().keyPressed(mouseX,mouseY,event.getKeyCode(),event.getScanCode());
 	}
 
-
 	@SubscribeEvent
 	public void onConfigurationChangedEvent(ConfigChangedEvent.OnConfigChangedEvent event) {
 		if (event.getModID().equalsIgnoreCase(VisibleArmorSlots.MOD_ID)) {
 			// Refresh the display parameters when the config changes
-			_cacheDisplayParams = new HashMap<String, InfoGuiOverlayDisplayParams>();
+			_cacheDisplayParams = new HashMap<>();
 		}
 	}
-
-
 }

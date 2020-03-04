@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.client.util.InputMappings;
@@ -177,18 +178,17 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	/**
 	 * Draws the extra slots overlay slots and their contents.
 	 */
-	public void drawScreen(double mouseX, double mouseY) {
+	public void render(double mouseX, double mouseY) {
 		this.theSlot = null;
 
-		//RenderHelper.enableGUIStandardItemLighting();
-		GlStateManager.pushMatrix();
-		GlStateManager.translated(this.guiLeft, this.guiTop, 0);
+		RenderHelper.enableGUIStandardItemLighting();
 
 
 		// Draw the slots
+		GlStateManager.pushMatrix();
+		GlStateManager.translated(this.guiLeft, this.guiTop, 0);
 		for (final Slot slot : extraSlots) {
-
-			// Slot content
+			// Slot items
 			if (slot.isEnabled()) {
 				this.drawSlot(slot);
 			}
@@ -202,24 +202,23 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 				GlStateManager.disableLighting();
 				GlStateManager.disableDepthTest();
 				GlStateManager.colorMask(true, true, true, false);
-				this.fillGradient(hoverX, hoverY, hoverX + 16, hoverY + 16, 0x7FFFFFFF, 0x7FFFFFFF);
+				GuiUtil.drawGradientRect(hoverX, hoverY, hoverX + 16, hoverY + 16, -600, -2130706433, -2130706433);
 				GlStateManager.colorMask(true, true, true, true);
 				GlStateManager.enableLighting();
 				GlStateManager.enableDepthTest();
 			}
-
 		}
-
-
 		GlStateManager.popMatrix();
-		GlStateManager.disableLighting();
+		renderHoveredTooltip(mouseX,mouseY);
+
+		RenderHelper.disableStandardItemLighting();
 	}
 
 
 	/**
 	 * Draws the extra slots overlay background.
 	 */
-	public void drawBackground() {
+	public void drawBackground(double mouseX, double mouseY) {
 		final int textureStartX = 0;
 		final int textureStartY = 62;
 		final int textureWidth = 24;
@@ -230,16 +229,15 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.mc.getTextureManager().bindTexture(GUI_EXTRA_SLOTS);
 		this.blit(startX, startY, textureStartX, textureStartY, textureWidth, textureHeight);
-	}
 
+	}
 
 	/**
 	 * Draws the extra slots overlay tooltips.
 	 */
-	public void drawForeground(int mouseX, int mouseY) {
+	public void renderHoveredTooltip(double mouseX, double mouseY) {
 		final PlayerInventory inventoryplayer = this.mc.player.inventory;
 		final ItemStack playerItemStack = inventoryplayer.getItemStack();
-
 
 		// Tooltip
 		if (playerItemStack.isEmpty() && this.theSlot != null && this.theSlot.getHasStack()) {
@@ -254,9 +252,8 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 		final int y = slot.yPos;
 		final ItemStack itemstack = slot.getStack();
 
-
 		// Slot background
-		if (itemstack.isEmpty() && slot.isEnabled()) {
+		if (itemstack.isEmpty()) {
 			final TextureAtlasSprite textureatlassprite = slot.getBackgroundSprite();
 
 			if (textureatlassprite != null) {
@@ -265,20 +262,16 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 				blit(x, y,blitOffset, 16, 16,textureatlassprite);
 				GlStateManager.enableLighting();
 			}
-
 		}
-
 		// Slot item
-		if (!itemstack.isEmpty()) {
+		else {
 			itemRender.renderItemAndEffectIntoGUI(mc.player, itemstack, x, y);
 			itemRender.renderItemOverlayIntoGUI(fontRenderer, itemstack, x, y, null);
 		}
-
-
 	}
 
 
-	protected void renderToolTip(ItemStack stack, int x, int y) {
+	protected void renderToolTip(ItemStack stack, double x, double y) {
 		final List<ITextComponent> list = stack.getTooltip(this.mc.player,this.mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
 
 		for (int i = 0; i < list.size(); ++i) {
@@ -290,9 +283,9 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 		}
 
 		FontRenderer font = stack.getItem().getFontRenderer(stack);
-		font = (font == null ? fontRenderer : font);
+		font = font == null ? fontRenderer : font;
 		net.minecraftforge.fml.client.config.GuiUtils.preItemToolTip(stack);
-		GuiUtil.drawHoveringText(list, x, y, this.screenWidth, this.screenHeight, -1, font);
+		GuiUtil.drawHoveringText(list,(int) x,(int) y, this.screenWidth, this.screenHeight, -1, font);
 		net.minecraftforge.fml.client.config.GuiUtils.postItemToolTip();
 	}
 
@@ -321,7 +314,6 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 			this.mouseClicked(mouseX, mouseY, this.eventButton);
 		} else if (clickedButton != -1) {
 			this.eventButton = -1;
-		//	this.mouseReleased(mouseX, mouseY, clickedButton);
 		} else if (this.eventButton != -1 && this.lastMouseEvent > 0L) {
 			final long l = System.currentTimeMillis() - this.lastMouseEvent;
 			this.mouseClickMove(mouseX, mouseY, this.eventButton, l);
@@ -387,9 +379,15 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	/**
 	 * Called when a mouse button is released.
 	 */
-	protected void mouseReleased(double mouseX, double mouseY, int state) {
-		// LogHelper.trace(" mouseReleased(%d, %d, %d)", mouseX, mouseY, state);
-	}
+	public boolean mouseReleased(double mouseX, double mouseY, int clickedButton) {
+		// Needed to avoid clicks on the gui overlay being interpreted as clicks outside the open gui,
+		// causing the items on the mouse to drop.
+			if (!this.isMouseOverGui(mouseX, mouseY)) {
+				return false;
+			}
+
+			return true;
+		}
 
 
 	// -----------------------------------------------------------
