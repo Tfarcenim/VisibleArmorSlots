@@ -1,7 +1,7 @@
 build/
 .classpath
 .project
-.gradle/
+.gradle
 eclipse/
 bin/
 repo/
@@ -14,6 +14,5 @@ run
 out
 
 # Package Files #
-*.jar
 *.war
 *.ear
