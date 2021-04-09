@@ -1,6 +1,7 @@
 package sidben.visiblearmorslots.client.gui;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
@@ -22,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 import sidben.visiblearmorslots.VisibleArmorSlots;
 import sidben.visiblearmorslots.client.gui.InfoExtraSlots.EnumSlotType;
 import sidben.visiblearmorslots.handler.action.SlotActionManager;
@@ -133,8 +135,8 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 
 	public void setExternalGuiPosition(Screen gui) {
 		if (gui instanceof ContainerScreen) {
-			final int candidateGuiLeft = ((ContainerScreen) gui).getGuiLeft();
-			final int candidateGuiTop = ((ContainerScreen) gui).getGuiTop();
+			final int candidateGuiLeft = ((ContainerScreen<?>) gui).getGuiLeft();
+			final int candidateGuiTop = ((ContainerScreen<?>) gui).getGuiTop();
 
 			// -- NOTE --
 			// The creative inventory would cause this method to be fired twice, once for
@@ -180,7 +182,7 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	/**
 	 * Draws the extra slots overlay slots and their contents.
 	 */
-	public void render(double mouseX, double mouseY) {
+	public void render(MatrixStack matrices,double mouseX, double mouseY) {
 		this.theSlot = null;
 		// Draw the slots
 		RenderSystem.pushMatrix();
@@ -189,7 +191,7 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 		for (final Slot slot : extraSlots) {
 			// Slot items
 			if (slot.isEnabled()) {
-				this.drawSlot(slot, mouseX, mouseY);
+				this.drawSlot(matrices,slot, mouseX, mouseY);
 			}
 			// Hover box
 			if (this.isMouseOverSlot(slot, mouseX, mouseY) && slot.isEnabled()) {
@@ -199,20 +201,20 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 				if (!slot.getHasStack()) {
 					GlStateManager.colorMask(true, true, true, false);
 					RenderSystem.enableBlend();
-					GuiUtil.drawGradientRect(hoverX, hoverY, hoverX + 16, hoverY + 16, 50, 0x80ffffff, 0x80ffffff);
+					fillGradient(matrices,hoverX, hoverY, hoverX + 16, hoverY + 16, 0x80ffffff, 0x80ffffff);
 					GlStateManager.colorMask(true, true, true, true);
 				}
 			}
 		}
 		RenderSystem.popMatrix();
-		renderHoveredTooltip(mouseX, mouseY);
+		renderHoveredTooltip(matrices,mouseX, mouseY);
 	}
 
 
 	/**
 	 * Draws the extra slots overlay background.
 	 */
-	public void drawBackground(double mouseX, double mouseY) {
+	public void drawBackground(MatrixStack matrices,double mouseX, double mouseY) {
 		final int textureStartX = 0;
 		final int textureStartY = 62;
 		final int textureWidth = 24;
@@ -222,52 +224,52 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 
 		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.mc.getTextureManager().bindTexture(GUI_EXTRA_SLOTS);
-		this.blit(startX, startY, textureStartX, textureStartY, textureWidth, textureHeight);
+		this.blit(matrices,startX, startY, textureStartX, textureStartY, textureWidth, textureHeight);
 	}
 
 	/**
 	 * Draws the extra slots overlay tooltips.
 	 */
-	public void renderHoveredTooltip(double mouseX, double mouseY) {
+	public void renderHoveredTooltip(MatrixStack matrices,double mouseX, double mouseY) {
 		final PlayerInventory inventoryplayer = this.mc.player.inventory;
 		final ItemStack playerItemStack = inventoryplayer.getItemStack();
 		// Tooltip
 		if (playerItemStack.isEmpty() && this.theSlot != null && this.theSlot.getHasStack()) {
 			final ItemStack slotStack = this.theSlot.getStack();
-			this.renderToolTip(slotStack, mouseX, mouseY);
+			this.renderToolTip(slotStack, matrices, mouseX, mouseY);
 		}
 	}
 
 
-	private void drawSlot(Slot slot, double mouseX, double mouseY) {
+	private void drawSlot(MatrixStack matrices,Slot slot, double mouseX, double mouseY) {
 		final int x = slot.xPos;
 		final int y = slot.yPos;
-		final ItemStack itemstack = slot.getStack();
-		this.setBlitOffset(0);
-		this.itemRender.zLevel = 100.0F;
-		boolean flag1 = isMouseOverSlot(slot, mouseX, mouseY);
+		final ItemStack slotStack = slot.getStack();
+		this.setBlitOffset(150);
+		this.itemRender.zLevel = 200F;
+		boolean hovered = isMouseOverSlot(slot, mouseX, mouseY);
 
 		// Slot background
-		if (itemstack.isEmpty()) {
-			Pair<ResourceLocation, ResourceLocation> pair = slot.func_225517_c_();
+		if (slotStack.isEmpty()) {
+			Pair<ResourceLocation, ResourceLocation> pair = slot.getBackground();
 			if (pair != null) {
-				TextureAtlasSprite textureatlassprite = this.mc.getTextureGetter(pair.getFirst()).apply(pair.getSecond());
+				TextureAtlasSprite textureatlassprite = this.mc.getAtlasSpriteGetter(pair.getFirst()).apply(pair.getSecond());
 				if (textureatlassprite != null) {
-					this.mc.getTextureManager().bindTexture(textureatlassprite.getAtlasTexture().getBasePath());
-					blit(x, y, getBlitOffset(), 16, 16, textureatlassprite);
+					this.mc.getTextureManager().bindTexture(textureatlassprite.getAtlasTexture().getTextureLocation());
+					blit(matrices,x, y, getBlitOffset(), 16, 16, textureatlassprite);
 				}
 			}
 		}
 		// Slot item
 		else {
-			{
-				itemRender.renderItemAndEffectIntoGUI(mc.player, itemstack, x, y);
-				itemRender.renderItemOverlayIntoGUI(fontRenderer, itemstack, x, y, null);
-				if (flag1) {
-					RenderSystem.disableDepthTest();
-					fill(x, y, x + 16, y + 16, -2130706433);
-					RenderSystem.enableDepthTest();
-				}
+			itemRender.renderItemAndEffectIntoGUI(mc.player, slotStack, x, y);
+			itemRender.renderItemOverlayIntoGUI(fontRenderer, slotStack, x, y, null);
+			if (hovered) {
+				RenderSystem.disableDepthTest();
+				RenderSystem.colorMask(true, true, true, false);
+				fill(matrices,x, y, x + 16, y + 16, 0x80ffffff);
+				RenderSystem.colorMask(true, true, true, true);
+				RenderSystem.enableDepthTest();
 			}
 		}
 		this.itemRender.zLevel = 0.0F;
@@ -275,9 +277,8 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	}
 
 
-	protected void renderToolTip(ItemStack stack, double x, double y) {
-		final List<ITextComponent> list = stack.getTooltip(this.mc.player, this.mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-		GuiUtil.drawHoveringText(list, (int) x, (int) y, mc.getMainWindow().getScaledWidth(), mc.getMainWindow().getScaledHeight(), 100, mc.fontRenderer);
+	protected void renderToolTip(ItemStack stack,MatrixStack matrices, double x, double y) {
+		GuiUtils.drawHoveringText(stack,matrices,stack.getTooltip(Minecraft.getInstance().player,ITooltipFlag.TooltipFlags.ADVANCED),(int)x,(int)y,screenWidth,screenHeight,100,fontRenderer);
 	}
 
 
@@ -371,11 +372,7 @@ public class GuiExtraSlotsOverlay extends AbstractGui {
 	public boolean mouseReleased(double mouseX, double mouseY, int clickedButton) {
 		// Needed to avoid clicks on the gui overlay being interpreted as clicks outside the open gui,
 		// causing the items on the mouse to drop.
-		if (!this.isMouseOverGui(mouseX, mouseY)) {
-			return false;
-		}
-
-		return true;
+		return this.isMouseOverGui(mouseX, mouseY);
 	}
 
 

@@ -10,6 +10,7 @@ loaderVersion="[28,)" #mandatory (28 is current forge version)
 # A URL to refer people to when problems occur with this mod
 #issueTrackerURL="http://my.issue.tracker/" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
+license="LGPL v3.0"
 [[mods]] #mandatory
 # The modid of the mod
 modId="visiblearmorslots" #mandatory
@@ -24,9 +25,9 @@ displayName="Visible Armor Slots" #mandatory
 # A file name (in the root of the mod JAR) containing a logo for display
 #logoFile="examplemod.png" #optional
 # A text field displayed in the mod UI
-credits="Thanks for this example mod goes to Java" #optional
+#credits="Thanks for this example mod goes to Java" #optional
 # A text field displayed in the mod UI
-authors="sidben" #optional
+authors="sidben,Tfarcenim" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
 Makes the armor and off-hand slots accessible on many inventories.

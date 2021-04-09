@@ -6,7 +6,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import sidben.visiblearmorslots.inventory.SlotOffHand;
-import sidben.visiblearmorslots.main.ModConfig;
+import sidben.visiblearmorslots.config.ModConfig;
 
 
 /**

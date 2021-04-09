@@ -52,11 +52,7 @@ public class SlotArmor extends Slot {
 	 */
 	@Override
 	public boolean isItemValid(ItemStack stack) {
-		if (stack == null) {
-			return false;
-		} else {
-			return stack.getItem().canEquip(stack, armorSloyArray[slotTypeIndex], thePlayer);
-		}
+		return stack.getItem().canEquip(stack, armorSloyArray[slotTypeIndex], thePlayer);
 	}
 
 	@Override
@@ -67,7 +63,7 @@ public class SlotArmor extends Slot {
 
 	@Nullable
 	@Override
-	public Pair<ResourceLocation, ResourceLocation> func_225517_c_() {
+	public Pair<ResourceLocation, ResourceLocation> getBackground() {
 		return Pair.of(PlayerContainer.LOCATION_BLOCKS_TEXTURE, ARMOR_SLOT_TEXTURES[slotTypeIndex]);
 	}
 }

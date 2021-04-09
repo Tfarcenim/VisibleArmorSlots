@@ -1,60 +1,51 @@
 package sidben.visiblearmorslots.util;
 
 import java.util.IllegalFormatException;
+
 import org.apache.logging.log4j.Level;
-import sidben.visiblearmorslots.main.ModConfig;
+import sidben.visiblearmorslots.config.ModConfig;
 
 
+public class LogHelper {
 
-public class LogHelper
-{
-
-    private static void log(Level logLevel, String format, Object... data)
-    {
+    private static void log(Level logLevel, String format, Object... data) {
         try {
-           // Lohher.log("sidben." + Reference.MOD_ID, logLevel, format, data);
+            // Lohher.log("sidben." + Reference.MOD_ID, logLevel, format, data);
         } catch (final IllegalFormatException e) {
             System.out.println(e);
             System.out.println(format);
         }
     }
 
-    public static void error(String format, Object... data)
-    {
+    public static void error(String format, Object... data) {
         log(Level.ERROR, format, data);
     }
 
-    public static void warn(String format, Object... data)
-    {
+    public static void warn(String format, Object... data) {
         log(Level.WARN, format, data);
     }
 
-    public static void info(String format, Object... data)
-    {
+    public static void info(String format, Object... data) {
         log(Level.INFO, format, data);
     }
 
-    public static void debug(String format, Object... data)
-    {
+    public static void debug(String format, Object... data) {
         if (ModConfig.onDebug()) {
             log(ModConfig.debugAsInfo() ? Level.INFO : Level.DEBUG, format, data);
         }
     }
 
-    public static void debug(Object object)
-    {
+    public static void debug(Object object) {
         debug(String.valueOf(object), new Object[0]);
     }
 
-    public static void trace(String format, Object... data)
-    {
+    public static void trace(String format, Object... data) {
         if (ModConfig.onDebug()) {
             log(ModConfig.debugAsInfo() ? Level.INFO : Level.TRACE, format, data);
         }
     }
 
-    public static void trace(Object object)
-    {
+    public static void trace(Object object) {
         trace(String.valueOf(object), new Object[0]);
     }
 

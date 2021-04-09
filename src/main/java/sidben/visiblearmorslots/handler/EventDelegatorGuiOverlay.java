@@ -2,6 +2,7 @@ package sidben.visiblearmorslots.handler;
 
 import java.util.HashMap;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.InventoryScreen;
@@ -15,7 +16,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.config.ModConfig.ModConfigEvent;
 import sidben.visiblearmorslots.VisibleArmorSlots;
 import sidben.visiblearmorslots.client.gui.GuiExtraSlotsOverlay;
-import sidben.visiblearmorslots.main.ModConfig;
+import sidben.visiblearmorslots.config.ModConfig;
+import sidben.visiblearmorslots.config.SlotPosition;
 import sidben.visiblearmorslots.util.LogHelper;
 
 
@@ -59,7 +61,7 @@ public class EventDelegatorGuiOverlay {
 			return InfoGuiOverlayDisplayParams.EMPTY;
 		}
 
-		final ContainerScreen guiContainer = (ContainerScreen) gui;
+		final ContainerScreen<?> guiContainer = (ContainerScreen<?>) gui;
 		InfoGuiOverlayDisplayParams displayParams;
 
 		// NOTE: inventorySlots should not be null, but we never know for sure...
@@ -86,7 +88,7 @@ public class EventDelegatorGuiOverlay {
 			displayParams = _cacheDisplayParams.get(guiClassKey);
 
 		} else {
-			displayParams = InfoGuiOverlayDisplayParams.create(guiContainer, guiClassKey);
+			displayParams = InfoGuiOverlayDisplayParams.create(guiContainer);
 			_cacheDisplayParams.put(guiClassKey, displayParams);
 			LogHelper.trace("EventDelegatorGuiOverlay: Cached display parameters for [%s], key [%s], value [%s]", gui, guiClassKey, displayParams);
 		}
@@ -129,12 +131,7 @@ public class EventDelegatorGuiOverlay {
 
 		// Reposition the overlay if the potion effects are taking space
 		if (this.getGuiOverlay().isPotionShiftActive()) {
-			if (ModConfig.extraSlotsSide().equals(ModConfig.POSITION_LEFT)) {
-				this.getGuiOverlay().guiLeft += ModConfig.POTION_SHIFT_MARGIN_LEFT;
-			} else if (ModConfig.extraSlotsSide().equals(ModConfig.POSITION_RIGHT)) {
-				this.getGuiOverlay().guiLeft += ModConfig.POTION_SHIFT_MARGIN_RIGHT;
-			}
-
+				this.getGuiOverlay().guiLeft += ModConfig.extraSlotsSide().x;
 			// Resets the state since the overlay class is shared among all containers.
 			this.getGuiOverlay().setPotionShiftState(false);
 		}
@@ -147,8 +144,9 @@ public class EventDelegatorGuiOverlay {
 		}
 		double mouseX = event.getMouseX();
 		double mouseY = event.getMouseY();
+		MatrixStack matrices = event.getMatrixStack();
 
-		this.getGuiOverlay().drawBackground(mouseX,mouseY);
+		this.getGuiOverlay().drawBackground(matrices,mouseX,mouseY);
 	}
 
 	@SubscribeEvent
@@ -156,7 +154,8 @@ public class EventDelegatorGuiOverlay {
 		if (!this.shouldDisplayGuiOverlay(event.getGui())) {
 			return;
 		}
-		this.getGuiOverlay().render(event.getMouseX(), event.getMouseY());
+		MatrixStack matrices = event.getMatrixStack();
+		this.getGuiOverlay().render(matrices,event.getMouseX(), event.getMouseY());
 	}
 
 	@SubscribeEvent

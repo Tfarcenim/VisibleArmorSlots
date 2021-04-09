@@ -6,7 +6,8 @@ import net.minecraft.client.gui.screen.inventory.ChestScreen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.ShulkerBoxScreen;
 import sidben.visiblearmorslots.client.gui.GuiExtraSlotsOverlay;
-import sidben.visiblearmorslots.main.ModConfig;
+import sidben.visiblearmorslots.config.ModConfig;
+import sidben.visiblearmorslots.config.SlotPosition;
 import sidben.visiblearmorslots.util.LogHelper;
 
 
@@ -37,7 +38,7 @@ public class InfoGuiOverlayDisplayParams {
 		this._shouldDisplay = shouldDisplay;
 	}
 
-	public static InfoGuiOverlayDisplayParams create(ContainerScreen gui, String guiClassName) {
+	public static InfoGuiOverlayDisplayParams create(ContainerScreen<?> gui) {
 		if (gui == null) {
 			return InfoGuiOverlayDisplayParams.EMPTY;
 		}
@@ -51,11 +52,12 @@ public class InfoGuiOverlayDisplayParams {
 		int overlayX = 0;
 		int overlayY = 0;
 
-		if (ModConfig.extraSlotsSide().equals(ModConfig.POSITION_LEFT)) {
+		if (ModConfig.extraSlotsSide() == SlotPosition.LEFT) {
 			overlayX = gui.getGuiLeft() - GuiExtraSlotsOverlay.GUI_WIDTH - ModConfig.extraSlotsMargin();
-		} else if (ModConfig.extraSlotsSide().equals(ModConfig.POSITION_RIGHT)) {
+		} else if (ModConfig.extraSlotsSide() == SlotPosition.RIGHT) {
 			overlayX = gui.getGuiLeft() + gui.getXSize() + ModConfig.extraSlotsMargin();
 		}
+
 		overlayY = gui.getGuiTop() + gui.getYSize() - GuiExtraSlotsOverlay.GUI_HEIGHT - 4;
 
 
@@ -68,12 +70,12 @@ public class InfoGuiOverlayDisplayParams {
 		return displayParams;
 	}
 
-	protected static boolean isBlacklisted(ContainerScreen gui) {
-		if (ModConfig.blacklistedModPackages().size() > 0) {
+	protected static boolean isBlacklisted(ContainerScreen<?> gui) {
+		if (ModConfig.blacklistedScreens().size() > 0) {
 			final String className = gui.getClass().getName();
 
-			for (final String blacklisted : ModConfig.blacklistedModPackages()) {
-				if (className.startsWith(blacklisted + ".")) {
+			for (final String blacklisted : ModConfig.blacklistedScreens()) {
+				if (className.contains(blacklisted)) {
 					LogHelper.trace("InfoGuiOverlayDisplayParams: This gui is blacklisted: [%s]", className);
 					return true;
 				}
